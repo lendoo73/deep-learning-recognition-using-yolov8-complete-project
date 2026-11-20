@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Brain Tumor Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 720px;
+            margin: auto;
+            padding: 1rem;
+            background: #f9f9f9;
+        }
+        h1, h2 {
+            color: #222;
+        }
+        a {
+            color: #0066cc;
+        }
+        #response-output img {
+            max-width: 100%;
+            margin-top: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #response-output p {
+            font-weight: bold;
+            margin-top: 1em;
+            color: #333;
+        }
+        #additional-info {
+            margin-top: 1em;
+            background: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 0.95rem;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Brain Tumor Detection</h1>
+    <p>
+        To test this model, you can try uploading CT images showing meningioma tumors like these:
+        <a href="https://www.google.com/search?q=ct+meningioma+tumor&tbm=isch" target="_blank" rel="noopener noreferrer">CT Meningioma Tumor Images</a>.
+    </p>
+    <p>
+        To test how the model performs on normal brains without tumors, you can try images here:
+        <a href="https://www.google.com/search?q=normal+ct+brain&tbm=isch" target="_blank" rel="noopener noreferrer">Normal CT Brain Images</a>.
+    </p>
+
+    <h2>Upload an Image for Prediction</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <h2>Response:</h2>
+    <div id="response-output"></div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const output = document.getElementById('response-output');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            output.innerHTML = 'Processing... Please wait.';
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/brain_tumor/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    output.textContent = 'Error: ' + response.statusText;
+                    return;
+                }
+
+                const result = await response.json();
+                output.innerHTML = '';
+
+                // Display annotated image if available
+                if (result.annotated_image_base64) {
+                    const img = document.createElement('img');
+                    img.src = 'data:image/jpeg;base64,' + result.annotated_image_base64;
+                    img.alt = 'Annotated Prediction';
+                    output.appendChild(img);
+                }
+
+                // Display user-friendly predictions
+                if (result.predictions && Array.isArray(result.predictions)) {
+                    result.predictions.forEach(pred => {
+                        const probPercent = (pred.confidence * 100).toFixed(1);
+                        const text = `${pred.class.charAt(0).toUpperCase() + pred.class.slice(1)} detected with ${probPercent}% probability.`;
+                        const p = document.createElement('p');
+                        p.textContent = text;
+                        output.appendChild(p);
+                    });
+                } else if (result.prediction) {
+                    const pred = document.createElement('p');
+                    pred.textContent = 'Prediction: ' + result.prediction;
+                    output.appendChild(pred);
+                }
+
+                // Display any other info fields in a clean box
+                const excludedKeys = ['annotated_image_base64', 'predictions', 'prediction'];
+                const otherKeys = Object.keys(result).filter(k => !excludedKeys.includes(k));
+                if (otherKeys.length > 0) {
+                    const infoBox = document.createElement('div');
+                    infoBox.id = 'additional-info';
+                    otherKeys.forEach(key => {
+                        const p = document.createElement('p');
+                        // Capitalize key and add value
+                        p.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${result[key]}`;
+                        infoBox.appendChild(p);
+                    });
+                    output.appendChild(infoBox);
+                }
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

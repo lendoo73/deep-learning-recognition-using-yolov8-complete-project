@@ -1,0 +1,34 @@
+# Secrets and local environment configuration
+.env
+.env.*
+!.env.example
+
+# Python environments and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# IDE settings
+.idea/
+.vscode/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Downloaded datasets and training output
+data/
+datasets/
+runs/
+
+# Model checkpoints and exported weights
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Local generated output and logs
+/predicted_mask.png
+*.log
+*.bak

@@ -18,7 +18,6 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Downloaded datasets and training output
-data/
 datasets/
 runs/
 

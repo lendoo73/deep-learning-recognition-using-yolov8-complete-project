@@ -1,0 +1,12 @@
+ipykernel==6.29.5
+ipython==9.3.0
+matplotlib==3.10.3
+numpy==2.2.6
+pandas==2.2.3
+python-dotenv==1.1.0
+roboflow==1.1.65
+scikit-learn==1.6.1
+seaborn==0.13.2
+supervision==0.25.1
+torch==2.7.0
+ultralytics==8.3.147
